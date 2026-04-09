@@ -5,6 +5,17 @@ var db = require('../db');
 
 var PAGE_SIZE = 20;
 
+var PHONE_RE = /^\d{3}-\d{3}-\d{4}$/;
+
+function formatPhone(val) {
+  if (!val || !val.trim()) return null;
+  var digits = val.replace(/\D/g, '');
+  if (digits.length === 10) {
+    return digits.slice(0, 3) + '-' + digits.slice(3, 6) + '-' + digits.slice(6);
+  }
+  return val.trim(); // return as-is; validator will catch bad formats
+}
+
 // List all customers (with search + pagination)
 router.get('/customers', requireLogin, async function(req, res, next) {
   try {
@@ -48,12 +59,17 @@ router.get('/customers/new', requireLogin, function(req, res) {
 
 // Create customer
 router.post('/customers', requireLogin, async function(req, res, next) {
-  var { name, email, phone, address } = req.body;
+  var { name, email, address } = req.body;
+  var phone = formatPhone(req.body.phone);
+  var errors = [];
 
-  if (!name || !name.trim()) {
+  if (!name || !name.trim()) errors.push('Name is required.');
+  if (phone && !PHONE_RE.test(phone)) errors.push('Phone must be in format 000-000-0000.');
+
+  if (errors.length) {
     return res.render('customers/new', {
       title: 'Add Customer',
-      errors: ['Name is required.'],
+      errors,
       values: req.body,
     });
   }
@@ -61,7 +77,7 @@ router.post('/customers', requireLogin, async function(req, res, next) {
   try {
     await db.query(
       'INSERT INTO customers (name, email, phone, address) VALUES (?, ?, ?, ?)',
-      [name.trim(), email || null, phone || null, address || null]
+      [name.trim(), email || null, phone, address || null]
     );
     res.redirect('/customers');
   } catch (err) {
@@ -82,21 +98,26 @@ router.get('/customers/:id/edit', requireLogin, async function(req, res, next) {
 
 // Update customer
 router.post('/customers/:id', requireLogin, async function(req, res, next) {
-  var { name, email, phone, address } = req.body;
+  var { name, email, address } = req.body;
+  var phone = formatPhone(req.body.phone);
+  var errors = [];
 
-  if (!name || !name.trim()) {
+  if (!name || !name.trim()) errors.push('Name is required.');
+  if (phone && !PHONE_RE.test(phone)) errors.push('Phone must be in format 000-000-0000.');
+
+  if (errors.length) {
     var [rows] = await db.query('SELECT * FROM customers WHERE id = ?', [req.params.id]);
     return res.render('customers/edit', {
       title: 'Edit Customer',
-      customer: rows[0] || {},
-      errors: ['Name is required.'],
+      customer: { ...(rows[0] || {}), ...req.body },
+      errors,
     });
   }
 
   try {
     await db.query(
       'UPDATE customers SET name = ?, email = ?, phone = ?, address = ? WHERE id = ?',
-      [name.trim(), email || null, phone || null, address || null, req.params.id]
+      [name.trim(), email || null, phone, address || null, req.params.id]
     );
     res.redirect('/customers');
   } catch (err) {
