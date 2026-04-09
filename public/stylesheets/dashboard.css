@@ -6,10 +6,11 @@ html, body {
 .sidebar {
   width: 250px;
   min-height: 100vh;
-  background-color: #1a56db;
+  background-color: #1e2025;
   display: flex;
   flex-direction: column;
   flex-shrink: 0;
+  border-right: 1px solid #2a2d35;
 }
 
 .sidebar .brand {
@@ -17,24 +18,39 @@ html, body {
   font-size: 1.1rem;
   font-weight: 700;
   color: #fff;
-  border-bottom: 1px solid rgba(255,255,255,0.15);
+  border-bottom: 1px solid #2a2d35;
   letter-spacing: 0.02em;
 }
 
-.sidebar .nav-link {
-  color: rgba(255,255,255,0.75);
-  padding: 0.65rem 1.5rem;
-  border-radius: 0;
-  display: flex;
-  align-items: center;
-  gap: 0.6rem;
-  font-size: 0.95rem;
+.sidebar .nav-section-label {
+  padding: 1rem 1.5rem 0.35rem;
+  font-size: 0.7rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: #5a5f6e;
 }
 
-.sidebar .nav-link:hover,
+.sidebar .nav-link {
+  color: #9ca3b0;
+  padding: 0.6rem 1rem;
+  margin: 0.1rem 0.75rem;
+  border-radius: 6px;
+  display: flex;
+  align-items: center;
+  gap: 0.65rem;
+  font-size: 0.9rem;
+  transition: background-color 0.15s, color 0.15s;
+}
+
+.sidebar .nav-link:hover {
+  color: #e2e5eb;
+  background-color: #2a2d35;
+}
+
 .sidebar .nav-link.active {
   color: #fff;
-  background-color: rgba(255,255,255,0.12);
+  background-color: #2563eb;
 }
 
 .sidebar .nav-link i {
@@ -45,19 +61,34 @@ html, body {
 
 .sidebar-footer {
   margin-top: auto;
-  padding: 1rem 1.5rem;
-  border-top: 1px solid rgba(255,255,255,0.15);
+  padding: 0.875rem 1.25rem;
+  border-top: 1px solid #2a2d35;
+  background-color: #191c21;
 }
 
 .sidebar-footer .username {
-  font-size: 0.875rem;
+  font-size: 0.85rem;
   font-weight: 600;
-  color: #fff;
+  color: #e2e5eb;
 }
 
 .sidebar-footer .user-role {
-  font-size: 0.75rem;
-  color: rgba(255,255,255,0.6);
+  font-size: 0.72rem;
+  color: #5a5f6e;
+}
+
+.sidebar-footer .btn-logout {
+  color: #5a5f6e;
+  border: none;
+  background: none;
+  padding: 0.25rem 0.4rem;
+  border-radius: 5px;
+  transition: color 0.15s, background-color 0.15s;
+}
+
+.sidebar-footer .btn-logout:hover {
+  color: #e2e5eb;
+  background-color: #2a2d35;
 }
 
 .main-content {

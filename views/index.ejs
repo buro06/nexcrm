@@ -11,33 +11,8 @@
   </head>
   <body class="d-flex">
 
-    <!-- Sidebar -->
-    <aside class="sidebar">
-      <div class="brand">
-        <i class="bi bi-ticket-perforated me-2"></i>CRM
-      </div>
+    <%- include('partials/sidebar', { active: 'home' }) %>
 
-      <nav class="nav flex-column pt-2">
-        <a href="/" class="nav-link active">
-          <i class="bi bi-house-door"></i> Home
-        </a>
-      </nav>
-
-      <!-- User info + logout pinned to bottom -->
-      <div class="sidebar-footer">
-        <div class="d-flex align-items-center justify-content-between">
-          <div>
-            <div class="username"><%= user.username %></div>
-            <div class="user-role">Logged in</div>
-          </div>
-          <a href="/logout" class="btn btn-sm btn-outline-light" title="Logout">
-            <i class="bi bi-box-arrow-right"></i>
-          </a>
-        </div>
-      </div>
-    </aside>
-
-    <!-- Main content -->
     <main class="main-content p-4">
       <h5 class="mb-4 fw-semibold">Home</h5>
 
@@ -46,6 +21,12 @@
           <div class="card stat-card p-3">
             <div class="text-muted small mb-1">Logged in as</div>
             <div class="fw-semibold fs-5"><%= user.username %></div>
+          </div>
+        </div>
+        <div class="col-sm-6 col-lg-4">
+          <div class="card stat-card p-3">
+            <div class="text-muted small mb-1">Email</div>
+            <div class="fw-semibold fs-5"><%= user.email || '—' %></div>
           </div>
         </div>
         <div class="col-sm-6 col-lg-4">

@@ -16,6 +16,18 @@ async function seed() {
     )
   `);
 
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS customers (
+      id INT AUTO_INCREMENT PRIMARY KEY,
+      name VARCHAR(100) NOT NULL,
+      email VARCHAR(150),
+      phone VARCHAR(30),
+      address TEXT,
+      created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+    )
+  `);
+
   const hash = await bcrypt.hash('password', 10);
 
   await db.query(

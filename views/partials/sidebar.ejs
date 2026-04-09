@@ -1,0 +1,26 @@
+<aside class="sidebar">
+  <div class="brand">
+    <i class="bi bi-ticket-perforated me-2"></i>NexCRM
+  </div>
+
+  <nav class="nav flex-column pt-2">
+    <a href="/" class="nav-link <%= active === 'home' ? 'active' : '' %>">
+      <i class="bi bi-house-door"></i> Home
+    </a>
+    <a href="/customers" class="nav-link <%= active === 'customers' ? 'active' : '' %>">
+      <i class="bi bi-people"></i> Customers
+    </a>
+  </nav>
+
+  <div class="sidebar-footer">
+    <div class="d-flex align-items-center justify-content-between">
+      <div>
+        <div class="username"><%= user.username %></div>
+        <div class="user-role">Logged in</div>
+      </div>
+      <a href="/logout" class="btn-logout" title="Logout">
+        <i class="bi bi-box-arrow-right"></i>
+      </a>
+    </div>
+  </div>
+</aside>
