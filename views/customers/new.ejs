@@ -45,11 +45,38 @@
                    value="<%= typeof values !== 'undefined' ? values.phone || '' : '' %>"
                    placeholder="555-123-4567" maxlength="12" />
           </div>
-          <div class="mb-4">
-            <label for="address" class="form-label">Address</label>
-            <textarea class="form-control" id="address" name="address" rows="3"><%= typeof values !== 'undefined' ? values.address || '' : '' %></textarea>
+
+          <hr class="my-3" />
+          <div class="mb-2 text-muted small fw-semibold text-uppercase" style="letter-spacing:.05em;">Address</div>
+
+          <div class="mb-3">
+            <label for="street" class="form-label">Street</label>
+            <div>
+              <input type="text" class="form-control" id="street" name="street"
+                     value="<%= typeof values !== 'undefined' ? values.street || '' : '' %>"
+                     placeholder="Start typing to search…" autocomplete="off" />
+            </div>
           </div>
-          <div class="d-flex gap-2">
+          <div class="row g-2 mb-3">
+            <div class="col-sm-5">
+              <label for="city" class="form-label">City</label>
+              <input type="text" class="form-control" id="city" name="city"
+                     value="<%= typeof values !== 'undefined' ? values.city || '' : '' %>" />
+            </div>
+            <div class="col-sm-4">
+              <label for="state" class="form-label">State</label>
+              <input type="text" class="form-control" id="state" name="state"
+                     value="<%= typeof values !== 'undefined' ? values.state || '' : '' %>" />
+            </div>
+            <div class="col-sm-3">
+              <label for="zip" class="form-label">Zip</label>
+              <input type="text" class="form-control" id="zip" name="zip"
+                     value="<%= typeof values !== 'undefined' ? values.zip || '' : '' %>"
+                     maxlength="10" />
+            </div>
+          </div>
+
+          <div class="d-flex gap-2 mt-4">
             <button type="submit" class="btn btn-primary">Save Customer</button>
             <a href="/customers" class="btn btn-outline-secondary">Cancel</a>
           </div>
@@ -59,5 +86,6 @@
 
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
     <script src="/javascripts/phone-format.js"></script>
+    <script src="/javascripts/address-autocomplete.js"></script>
   </body>
 </html>

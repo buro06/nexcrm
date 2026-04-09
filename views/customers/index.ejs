@@ -34,7 +34,7 @@
             class="form-control border-start-0 ps-0"
             name="q"
             value="<%= q %>"
-            placeholder="Search by name, email, phone or address…"
+            placeholder="Search by name, email, phone, city, zip…"
           />
           <% if (q) { %>
             <a href="/customers" class="btn btn-outline-secondary">Clear</a>
@@ -66,7 +66,10 @@
                   <th>Name</th>
                   <th>Email</th>
                   <th>Phone</th>
-                  <th>Address</th>
+                  <th>Street</th>
+                  <th>City</th>
+                  <th>State</th>
+                  <th>Zip</th>
                   <th></th>
                 </tr>
               </thead>
@@ -76,7 +79,10 @@
                     <td class="fw-medium"><%= c.name %></td>
                     <td><%= c.email || '—' %></td>
                     <td><%= c.phone || '—' %></td>
-                    <td><%= c.address || '—' %></td>
+                    <td><%= c.street || '—' %></td>
+                    <td><%= c.city || '—' %></td>
+                    <td><%= c.state || '—' %></td>
+                    <td><%= c.zip || '—' %></td>
                     <td class="text-end" style="white-space: nowrap;">
                       <a href="/customers/<%= c.id %>/edit" class="btn btn-sm btn-outline-secondary me-1">
                         <i class="bi bi-pencil"></i>
@@ -97,28 +103,52 @@
 
         <!-- Pagination -->
         <% if (totalPages > 1) { %>
-          <nav aria-label="Customer pages">
-            <ul class="pagination pagination-sm mb-0">
-              <li class="page-item <%= page <= 1 ? 'disabled' : '' %>">
-                <a class="page-link" href="/customers?page=<%= page - 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %>">
-                  <i class="bi bi-chevron-left"></i>
-                </a>
-              </li>
+          <%
+            var qs = q ? '&q=' + encodeURIComponent(q) : '';
+            var pageLink = function(p) { return '/customers?page=' + p + qs; };
 
-              <% for (var p = 1; p <= totalPages; p++) { %>
-                <li class="page-item <%= p === page ? 'active' : '' %>">
-                  <a class="page-link" href="/customers?page=<%= p %><%= q ? '&q=' + encodeURIComponent(q) : '' %>">
-                    <%= p %>
+            // Build the list of page tokens to render (numbers or 'ellipsis')
+            var tokens = [];
+            var WING = 2; // pages shown either side of current
+            for (var p = 1; p <= totalPages; p++) {
+              var nearStart = p <= 1 + WING + 1;
+              var nearEnd   = p >= totalPages - WING - 1;
+              var nearCurr  = Math.abs(p - page) <= WING;
+              if (nearStart || nearEnd || nearCurr) {
+                tokens.push(p);
+              } else if (tokens[tokens.length - 1] !== 'ellipsis') {
+                tokens.push('ellipsis');
+              }
+            }
+          %>
+          <div class="d-flex align-items-center gap-3">
+            <nav aria-label="Customer pages">
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item <%= page <= 1 ? 'disabled' : '' %>">
+                  <a class="page-link" href="<%= pageLink(page - 1) %>">
+                    <i class="bi bi-chevron-left"></i>
                   </a>
                 </li>
-              <% } %>
 
-              <li class="page-item <%= page >= totalPages ? 'disabled' : '' %>">
-                <a class="page-link" href="/customers?page=<%= page + 1 %><%= q ? '&q=' + encodeURIComponent(q) : '' %>">
-                  <i class="bi bi-chevron-right"></i>
-                </a>
-              </li>
-            </ul>
+                <% tokens.forEach(function(token) { %>
+                  <% if (token === 'ellipsis') { %>
+                    <li class="page-item disabled"><span class="page-link">…</span></li>
+                  <% } else { %>
+                    <li class="page-item <%= token === page ? 'active' : '' %>">
+                      <a class="page-link" href="<%= pageLink(token) %>"><%= token %></a>
+                    </li>
+                  <% } %>
+                <% }); %>
+
+                <li class="page-item <%= page >= totalPages ? 'disabled' : '' %>">
+                  <a class="page-link" href="<%= pageLink(page + 1) %>">
+                    <i class="bi bi-chevron-right"></i>
+                  </a>
+                </li>
+              </ul>
+            </nav>
+            <span class="text-muted small">Page <%= page %> of <%= totalPages %></span>
+          </div>
           </nav>
         <% } %>
       <% } %>
