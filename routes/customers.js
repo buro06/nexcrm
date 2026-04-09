@@ -3,11 +3,39 @@ var router = express.Router();
 var { requireLogin } = require('../middleware/auth');
 var db = require('../db');
 
-// List all customers
+var PAGE_SIZE = 20;
+
+// List all customers (with search + pagination)
 router.get('/customers', requireLogin, async function(req, res, next) {
   try {
-    var [customers] = await db.query('SELECT * FROM customers ORDER BY name ASC');
-    res.render('customers/index', { title: 'Customers', customers });
+    var q = (req.query.q || '').trim();
+    var page = Math.max(1, parseInt(req.query.page) || 1);
+    var offset = (page - 1) * PAGE_SIZE;
+
+    var countSql, dataSql, params;
+    if (q) {
+      var like = '%' + q + '%';
+      params = [like, like, like, like];
+      countSql = 'SELECT COUNT(*) AS total FROM customers WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? OR address LIKE ?';
+      dataSql  = 'SELECT * FROM customers WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? OR address LIKE ? ORDER BY updated_at DESC LIMIT ? OFFSET ?';
+    } else {
+      params = [];
+      countSql = 'SELECT COUNT(*) AS total FROM customers';
+      dataSql  = 'SELECT * FROM customers ORDER BY updated_at DESC LIMIT ? OFFSET ?';
+    }
+
+    var [[{ total }]] = await db.query(countSql, params);
+    var [customers]   = await db.query(dataSql, [...params, PAGE_SIZE, offset]);
+    var totalPages    = Math.ceil(total / PAGE_SIZE) || 1;
+
+    res.render('customers/index', {
+      title: 'Customers',
+      customers,
+      q,
+      page,
+      totalPages,
+      total,
+    });
   } catch (err) {
     next(err);
   }
