@@ -1,0 +1,73 @@
+html, body {
+  height: 100%;
+  margin: 0;
+}
+
+.sidebar {
+  width: 250px;
+  min-height: 100vh;
+  background-color: #1a56db;
+  display: flex;
+  flex-direction: column;
+  flex-shrink: 0;
+}
+
+.sidebar .brand {
+  padding: 1.25rem 1.5rem;
+  font-size: 1.1rem;
+  font-weight: 700;
+  color: #fff;
+  border-bottom: 1px solid rgba(255,255,255,0.15);
+  letter-spacing: 0.02em;
+}
+
+.sidebar .nav-link {
+  color: rgba(255,255,255,0.75);
+  padding: 0.65rem 1.5rem;
+  border-radius: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  font-size: 0.95rem;
+}
+
+.sidebar .nav-link:hover,
+.sidebar .nav-link.active {
+  color: #fff;
+  background-color: rgba(255,255,255,0.12);
+}
+
+.sidebar .nav-link i {
+  font-size: 1rem;
+  width: 1.2rem;
+  text-align: center;
+}
+
+.sidebar-footer {
+  margin-top: auto;
+  padding: 1rem 1.5rem;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+.sidebar-footer .username {
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: #fff;
+}
+
+.sidebar-footer .user-role {
+  font-size: 0.75rem;
+  color: rgba(255,255,255,0.6);
+}
+
+.main-content {
+  flex: 1;
+  background-color: #f4f6f9;
+  overflow-y: auto;
+}
+
+.stat-card {
+  border: none;
+  border-radius: 10px;
+  box-shadow: 0 1px 4px rgba(0,0,0,0.07);
+}
