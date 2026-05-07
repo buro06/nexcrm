@@ -5,11 +5,7 @@ var cookieParser = require('cookie-parser');
 var logger = require('morgan');
 var session = require('express-session');
 
-var indexRouter = require('./routes/index');
-var usersRouter = require('./routes/users');
-var authRouter = require('./routes/auth');
-var customersRouter = require('./routes/customers');
-var apiRouter = require('./routes/api');
+var fs = require('fs');
 
 var app = express();
 
@@ -36,11 +32,11 @@ app.use(function(req, res, next) {
   next();
 });
 
-app.use('/', authRouter);
-app.use('/', indexRouter);
-app.use('/', customersRouter);
-app.use('/', apiRouter);
-app.use('/users', usersRouter);
+fs.readdirSync(path.join(__dirname, 'routes'))
+  .filter(function(f) { return f.endsWith('.js'); })
+  .forEach(function(file) {
+    app.use('/', require('./routes/' + file));
+  });
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

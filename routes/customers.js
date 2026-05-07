@@ -81,6 +81,18 @@ router.post('/customers', requireLogin, async function(req, res, next) {
   }
 });
 
+// Customer detail page
+router.get('/customers/:id', requireLogin, async function(req, res, next) {
+  try {
+    var [rows]   = await db.query('SELECT * FROM customers WHERE id = ?', [req.params.id]);
+    if (rows.length === 0) return res.redirect('/customers');
+    var [assets] = await db.query('SELECT * FROM assets WHERE customer_id = ? ORDER BY updated_at DESC', [req.params.id]);
+    res.render('customers/show', { title: rows[0].name, customer: rows[0], assets });
+  } catch (err) {
+    next(err);
+  }
+});
+
 // Edit customer form
 router.get('/customers/:id/edit', requireLogin, async function(req, res, next) {
   try {
