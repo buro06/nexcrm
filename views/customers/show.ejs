@@ -17,7 +17,10 @@
         <a href="/customers" class="btn-logout me-3" title="Back"><i class="bi bi-arrow-left"></i></a>
         <h5 class="fw-semibold mb-0"><%= customer.name %></h5>
         <div class="ms-auto d-flex gap-2">
-          <a href="/assets/new?customer_id=<%= customer.id %>" class="btn btn-primary btn-sm">
+          <a href="/tickets/new?customer_id=<%= customer.id %>" class="btn btn-primary btn-sm">
+            <i class="bi bi-ticket-perforated me-1"></i> New Ticket
+          </a>
+          <a href="/assets/new?customer_id=<%= customer.id %>" class="btn btn-outline-secondary btn-sm">
             <i class="bi bi-laptop me-1"></i> Add Asset
           </a>
           <a href="/customers/<%= customer.id %>/edit" class="btn btn-outline-secondary btn-sm">

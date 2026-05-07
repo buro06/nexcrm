@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title><%= title %> – NexCRM</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
+    <link rel="stylesheet" href="/stylesheets/style.css" />
+    <link rel="stylesheet" href="/stylesheets/dashboard.css" />
+  </head>
+  <body class="d-flex">
+    <%- include('../partials/sidebar', { active: 'tickets' }) %>
+    <main class="main-content p-4" style="max-width:760px;">
+
+      <div class="d-flex align-items-center mb-4">
+        <a href="/tickets" class="btn-logout me-3" title="Back"><i class="bi bi-arrow-left"></i></a>
+        <h5 class="fw-semibold mb-0">New Ticket</h5>
+        <span class="ms-3 text-muted small"><%= suggestedNumber %></span>
+      </div>
+
+      <% if (errors.length) { %>
+        <div class="alert alert-danger py-2">
+          <% errors.forEach(function(e) { %><div><%= e %></div><% }); %>
+        </div>
+      <% } %>
+
+      <form method="POST" action="/tickets">
+
+        <div class="card stat-card p-4 mb-3">
+          <h6 class="fw-semibold mb-3">Customer & Asset</h6>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium" for="customer_id">Customer <span class="text-danger">*</span></label>
+            <select class="form-select" id="customer_id" name="customer_id" required onchange="filterAssets()">
+              <option value="">Select a customer…</option>
+              <% customers.forEach(function(c) { %>
+                <option value="<%= c.id %>" <%= String(c.id) === String(selectedCustomerId) ? 'selected' : '' %>><%= c.name %></option>
+              <% }); %>
+            </select>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label fw-medium" for="asset_id">Asset <span class="text-muted fw-normal">(optional)</span></label>
+            <select class="form-select" id="asset_id" name="asset_id">
+              <option value="">No asset / walk-in</option>
+              <% assets.forEach(function(a) { %>
+                <option value="<%= a.id %>"
+                        data-customer="<%= a.customer_id %>"
+                        <%= String(a.id) === String(selectedAssetId) ? 'selected' : '' %>>
+                  <%= a.tag_number ? '[' + a.tag_number + '] ' : '' %><%= a.display_name %>
+                </option>
+              <% }); %>
+            </select>
+          </div>
+        </div>
+
+        <div class="card stat-card p-4 mb-3">
+          <h6 class="fw-semibold mb-3">Ticket Details</h6>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium" for="issue">Issue <span class="text-danger">*</span></label>
+            <textarea class="form-control" id="issue" name="issue" rows="4"
+                      placeholder="Describe the problem…" required><%= (values.issue || '') %></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium" for="solution">Solution</label>
+            <textarea class="form-control" id="solution" name="solution" rows="4"
+                      placeholder="What was done to resolve it…"><%= (values.solution || '') %></textarea>
+          </div>
+
+          <div class="mb-3">
+            <label class="form-label fw-medium" for="notes">Notes</label>
+            <textarea class="form-control" id="notes" name="notes" rows="3"
+                      placeholder="Any additional notes…"><%= (values.notes || '') %></textarea>
+          </div>
+
+          <div class="mb-0">
+            <label class="form-label fw-medium" for="status">Status <span class="text-danger">*</span></label>
+            <select class="form-select" id="status" name="status" required>
+              <% Object.entries(STATUS_LABELS).forEach(function([val, label]) { %>
+                <option value="<%= val %>" <%= (values.status || 'open') === val ? 'selected' : '' %>><%= label %></option>
+              <% }); %>
+            </select>
+          </div>
+        </div>
+
+        <div class="d-flex gap-2">
+          <button type="submit" class="btn btn-primary">Create Ticket</button>
+          <a href="/tickets" class="btn btn-outline-secondary">Cancel</a>
+        </div>
+      </form>
+
+    </main>
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+      var allAssets = Array.from(document.querySelectorAll('#asset_id option[data-customer]'));
+
+      function filterAssets() {
+        var customerId = document.getElementById('customer_id').value;
+        var assetSel   = document.getElementById('asset_id');
+        var current    = assetSel.value;
+
+        allAssets.forEach(function(opt) {
+          opt.hidden = customerId && opt.dataset.customer !== customerId;
+        });
+
+        if (current && assetSel.querySelector('option[value="' + current + '"]:not([hidden])') === null) {
+          assetSel.value = '';
+        }
+      }
+
+      filterAssets();
+    </script>
+  </body>
+</html>

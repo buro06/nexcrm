@@ -44,6 +44,23 @@ async function seed() {
     )
   `);
 
+  await db.query(`
+    CREATE TABLE IF NOT EXISTS tickets (
+      id            INT AUTO_INCREMENT PRIMARY KEY,
+      ticket_number VARCHAR(20) UNIQUE,
+      customer_id   INT NOT NULL,
+      asset_id      INT,
+      issue         TEXT NOT NULL,
+      solution      TEXT,
+      notes         TEXT,
+      status        ENUM('open','pending_payment','waiting_pickup','part_request','complete') NOT NULL DEFAULT 'open',
+      created_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
+      updated_at    TIMESTAMP DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+      FOREIGN KEY (customer_id) REFERENCES customers(id) ON DELETE CASCADE,
+      FOREIGN KEY (asset_id)    REFERENCES assets(id)    ON DELETE SET NULL
+    )
+  `);
+
   const hash = await bcrypt.hash('password', 10);
 
   await db.query(
