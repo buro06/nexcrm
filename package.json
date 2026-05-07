@@ -4,11 +4,15 @@
   "private": true,
   "scripts": {
     "start": "node ./bin/www",
-    "dev": "nodemon ./bin/www"
+    "dev": "nodemon ./bin/www",
+    "seed:demo": "node db/seed-demo.js"
   },
   "nodemonConfig": {
     "ext": "js,json",
-    "ignore": ["views/", "public/"]
+    "ignore": [
+      "views/",
+      "public/"
+    ]
   },
   "dependencies": {
     "bcryptjs": "^3.0.3",
@@ -22,5 +26,8 @@
     "morgan": "~1.9.1",
     "mysql2": "^3.21.0",
     "nodemon": "^3.1.14"
+  },
+  "devDependencies": {
+    "@faker-js/faker": "^10.4.0"
   }
 }

@@ -37,11 +37,14 @@ router.get('/assets', requireLogin, async function(req, res, next) {
 // New asset form
 router.get('/assets/new', requireLogin, async function(req, res, next) {
   try {
-    var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
     var [[{ next }]] = await db.query('SELECT COALESCE(MAX(id), 0) + 1 AS next FROM assets');
     var suggestedTag = 'AST-' + String(next).padStart(5, '0');
-    var selectedCustomerId = req.query.customer_id || '';
-    res.render('assets/new', { title: 'Add Asset', customers, suggestedTag, selectedCustomerId, errors: [] });
+    var selectedCustomer = null;
+    if (req.query.customer_id) {
+      var [[cx]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [req.query.customer_id]);
+      selectedCustomer = cx || null;
+    }
+    res.render('assets/new', { title: 'Add Asset', suggestedTag, selectedCustomer, errors: [], values: {} });
   } catch (err) {
     next(err);
   }
@@ -59,8 +62,12 @@ router.post('/assets', requireLogin, async function(req, res, next) {
   if (!customer_id) errors.push('Customer is required.');
 
   if (errors.length) {
-    var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
-    return res.render('assets/new', { title: 'Add Asset', customers, suggestedTag: tag_number, selectedCustomerId: customer_id || '', errors, values: req.body });
+    var selectedCustomer = null;
+    if (customer_id) {
+      var [[cx]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [customer_id]);
+      selectedCustomer = cx || null;
+    }
+    return res.render('assets/new', { title: 'Add Asset', suggestedTag: tag_number, selectedCustomer, errors, values: req.body });
   }
 
   try {
@@ -83,10 +90,10 @@ router.post('/assets', requireLogin, async function(req, res, next) {
 // Edit asset form
 router.get('/assets/:id/edit', requireLogin, async function(req, res, next) {
   try {
-    var [rows]      = await db.query('SELECT * FROM assets WHERE id = ?', [req.params.id]);
-    var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
+    var [rows] = await db.query('SELECT * FROM assets WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.redirect('/assets');
-    res.render('assets/edit', { title: 'Edit Asset', asset: rows[0], customers, errors: [] });
+    var [[selectedCustomer]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [rows[0].customer_id]);
+    res.render('assets/edit', { title: 'Edit Asset', asset: rows[0], selectedCustomer: selectedCustomer || null, errors: [] });
   } catch (err) {
     next(err);
   }
@@ -104,9 +111,13 @@ router.post('/assets/:id', requireLogin, async function(req, res, next) {
   if (!customer_id) errors.push('Customer is required.');
 
   if (errors.length) {
-    var [rows]      = await db.query('SELECT * FROM assets WHERE id = ?', [req.params.id]);
-    var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
-    return res.render('assets/edit', { title: 'Edit Asset', asset: { ...(rows[0] || {}), ...req.body }, customers, errors });
+    var [rows] = await db.query('SELECT * FROM assets WHERE id = ?', [req.params.id]);
+    var selectedCustomer = null;
+    if (customer_id) {
+      var [[cx]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [customer_id]);
+      selectedCustomer = cx || null;
+    }
+    return res.render('assets/edit', { title: 'Edit Asset', asset: { ...(rows[0] || {}), ...req.body }, selectedCustomer, errors });
   }
 
   try {

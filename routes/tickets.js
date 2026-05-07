@@ -62,15 +62,21 @@ router.get('/tickets', requireLogin, async function(req, res, next) {
 // New ticket form
 router.get('/tickets/new', requireLogin, async function(req, res, next) {
   try {
-    var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
-    var [assets]    = await db.query('SELECT id, tag_number, display_name, customer_id FROM assets ORDER BY display_name ASC');
     var [[{ next }]] = await db.query('SELECT COALESCE(MAX(id), 0) + 1 AS next FROM tickets');
     var suggestedNumber = 'TKT-' + String(next).padStart(5, '0');
-    var selectedCustomerId = req.query.customer_id || '';
-    var selectedAssetId    = req.query.asset_id    || '';
+    var selectedCustomer = null;
+    var selectedAsset    = null;
+    if (req.query.customer_id) {
+      var [[cx]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [req.query.customer_id]);
+      selectedCustomer = cx || null;
+    }
+    if (req.query.asset_id) {
+      var [[ax]] = await db.query('SELECT id, tag_number, display_name FROM assets WHERE id = ?', [req.query.asset_id]);
+      if (ax) selectedAsset = { id: ax.id, label: (ax.tag_number ? '[' + ax.tag_number + '] ' : '') + ax.display_name };
+    }
     res.render('tickets/new', {
-      title: 'New Ticket', customers, assets, suggestedNumber,
-      selectedCustomerId, selectedAssetId, STATUS_LABELS, errors: [], values: {}
+      title: 'New Ticket', suggestedNumber, selectedCustomer, selectedAsset,
+      STATUS_LABELS, errors: [], values: {}
     });
   } catch (err) {
     next(err);
@@ -89,13 +95,20 @@ router.post('/tickets', requireLogin, async function(req, res, next) {
 
   if (errors.length) {
     try {
-      var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
-      var [assets]    = await db.query('SELECT id, tag_number, display_name, customer_id FROM assets ORDER BY display_name ASC');
       var [[{ next }]] = await db.query('SELECT COALESCE(MAX(id), 0) + 1 AS next FROM tickets');
       var suggestedNumber = 'TKT-' + String(next).padStart(5, '0');
+      var selectedCustomer = null;
+      var selectedAsset    = null;
+      if (customer_id) {
+        var [[cx]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [customer_id]);
+        selectedCustomer = cx || null;
+      }
+      if (asset_id) {
+        var [[ax]] = await db.query('SELECT id, tag_number, display_name FROM assets WHERE id = ?', [asset_id]);
+        if (ax) selectedAsset = { id: ax.id, label: (ax.tag_number ? '[' + ax.tag_number + '] ' : '') + ax.display_name };
+      }
       return res.render('tickets/new', {
-        title: 'New Ticket', customers, assets, suggestedNumber,
-        selectedCustomerId: customer_id || '', selectedAssetId: asset_id || '',
+        title: 'New Ticket', suggestedNumber, selectedCustomer, selectedAsset,
         STATUS_LABELS, errors, values: req.body
       });
     } catch (err) { return next(err); }
@@ -134,11 +147,16 @@ router.get('/tickets/:id', requireLogin, async function(req, res, next) {
 // Edit ticket form
 router.get('/tickets/:id/edit', requireLogin, async function(req, res, next) {
   try {
-    var [rows]      = await db.query('SELECT * FROM tickets WHERE id = ?', [req.params.id]);
+    var [rows] = await db.query('SELECT * FROM tickets WHERE id = ?', [req.params.id]);
     if (rows.length === 0) return res.redirect('/tickets');
-    var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
-    var [assets]    = await db.query('SELECT id, tag_number, display_name, customer_id FROM assets ORDER BY display_name ASC');
-    res.render('tickets/edit', { title: 'Edit Ticket', ticket: rows[0], customers, assets, STATUS_LABELS, errors: [] });
+    var ticket = rows[0];
+    var [[selectedCustomer]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [ticket.customer_id]);
+    var selectedAsset = null;
+    if (ticket.asset_id) {
+      var [[ax]] = await db.query('SELECT id, tag_number, display_name FROM assets WHERE id = ?', [ticket.asset_id]);
+      if (ax) selectedAsset = { id: ax.id, label: (ax.tag_number ? '[' + ax.tag_number + '] ' : '') + ax.display_name };
+    }
+    res.render('tickets/edit', { title: 'Edit Ticket', ticket, selectedCustomer: selectedCustomer || null, selectedAsset, STATUS_LABELS, errors: [] });
   } catch (err) {
     next(err);
   }
@@ -156,12 +174,20 @@ router.post('/tickets/:id', requireLogin, async function(req, res, next) {
 
   if (errors.length) {
     try {
-      var [rows]      = await db.query('SELECT * FROM tickets WHERE id = ?', [req.params.id]);
-      var [customers] = await db.query('SELECT id, name FROM customers ORDER BY name ASC');
-      var [assets]    = await db.query('SELECT id, tag_number, display_name, customer_id FROM assets ORDER BY display_name ASC');
+      var [rows] = await db.query('SELECT * FROM tickets WHERE id = ?', [req.params.id]);
+      var selectedCustomer = null;
+      var selectedAsset    = null;
+      if (customer_id) {
+        var [[cx]] = await db.query('SELECT id, name FROM customers WHERE id = ?', [customer_id]);
+        selectedCustomer = cx || null;
+      }
+      if (asset_id) {
+        var [[ax]] = await db.query('SELECT id, tag_number, display_name FROM assets WHERE id = ?', [asset_id]);
+        if (ax) selectedAsset = { id: ax.id, label: (ax.tag_number ? '[' + ax.tag_number + '] ' : '') + ax.display_name };
+      }
       return res.render('tickets/edit', {
         title: 'Edit Ticket', ticket: { ...(rows[0] || {}), ...req.body },
-        customers, assets, STATUS_LABELS, errors
+        selectedCustomer, selectedAsset, STATUS_LABELS, errors
       });
     } catch (err) { return next(err); }
   }

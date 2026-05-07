@@ -8,6 +8,7 @@
     <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet" />
     <link rel="stylesheet" href="/stylesheets/style.css" />
     <link rel="stylesheet" href="/stylesheets/dashboard.css" />
+    <link href="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/css/tom-select.bootstrap5.min.css" rel="stylesheet" />
   </head>
   <body class="d-flex">
     <%- include('../partials/sidebar', { active: 'tickets' }) %>
@@ -31,26 +32,16 @@
 
           <div class="mb-3">
             <label class="form-label fw-medium" for="customer_id">Customer <span class="text-danger">*</span></label>
-            <select class="form-select" id="customer_id" name="customer_id" required onchange="filterAssets()">
-              <option value="">Select a customer…</option>
-              <% customers.forEach(function(c) { %>
-                <option value="<%= c.id %>" <%= String(c.id) === String(ticket.customer_id) ? 'selected' : '' %>><%= c.name %></option>
-              <% }); %>
-            </select>
+            <select id="customer_id" name="customer_id" placeholder="Search customers…" required
+                    data-options="<%= JSON.stringify(selectedCustomer ? [selectedCustomer] : []) %>"
+                    data-items="<%= JSON.stringify(selectedCustomer ? [String(selectedCustomer.id)] : []) %>"></select>
           </div>
 
           <div class="mb-0">
             <label class="form-label fw-medium" for="asset_id">Asset <span class="text-muted fw-normal">(optional)</span></label>
-            <select class="form-select" id="asset_id" name="asset_id">
-              <option value="">No asset / walk-in</option>
-              <% assets.forEach(function(a) { %>
-                <option value="<%= a.id %>"
-                        data-customer="<%= a.customer_id %>"
-                        <%= String(a.id) === String(ticket.asset_id) ? 'selected' : '' %>>
-                  <%= a.tag_number ? '[' + a.tag_number + '] ' : '' %><%= a.display_name %>
-                </option>
-              <% }); %>
-            </select>
+            <select id="asset_id" name="asset_id" placeholder="Search assets…"
+                    data-options="<%= JSON.stringify(selectedAsset ? [selectedAsset] : []) %>"
+                    data-items="<%= JSON.stringify(selectedAsset ? [String(selectedAsset.id)] : []) %>"></select>
           </div>
         </div>
 
@@ -90,24 +81,7 @@
 
     </main>
     <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
-    <script>
-      var allAssets = Array.from(document.querySelectorAll('#asset_id option[data-customer]'));
-
-      function filterAssets() {
-        var customerId = document.getElementById('customer_id').value;
-        var assetSel   = document.getElementById('asset_id');
-        var current    = assetSel.value;
-
-        allAssets.forEach(function(opt) {
-          opt.hidden = customerId && opt.dataset.customer !== customerId;
-        });
-
-        if (current && assetSel.querySelector('option[value="' + current + '"]:not([hidden])') === null) {
-          assetSel.value = '';
-        }
-      }
-
-      filterAssets();
-    </script>
+    <script src="https://cdn.jsdelivr.net/npm/tom-select@2.3.1/dist/js/tom-select.complete.min.js"></script>
+    <script src="/javascripts/ticket-selects.js"></script>
   </body>
 </html>

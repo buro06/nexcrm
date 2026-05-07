@@ -1,6 +1,53 @@
 var express = require('express');
 var router = express.Router();
 var { requireLogin } = require('../middleware/auth');
+var db = require('../db');
+
+router.get('/api/customers/search', requireLogin, async function(req, res) {
+  var q = (req.query.q || '').trim();
+  if (!q) return res.json([]);
+  var like = '%' + q + '%';
+  try {
+    var [rows] = await db.query(
+      'SELECT id, name FROM customers WHERE name LIKE ? OR email LIKE ? OR phone LIKE ? ORDER BY name ASC LIMIT 12',
+      [like, like, like]
+    );
+    res.json(rows);
+  } catch (err) {
+    res.json([]);
+  }
+});
+
+router.get('/api/assets/search', requireLogin, async function(req, res) {
+  var q          = (req.query.q || '').trim();
+  var customerId = req.query.customer_id || '';
+  var conditions = [];
+  var params     = [];
+
+  if (q) {
+    var like = '%' + q + '%';
+    conditions.push('(display_name LIKE ? OR tag_number LIKE ? OR make LIKE ?)');
+    params.push(like, like, like);
+  }
+  if (customerId) {
+    conditions.push('customer_id = ?');
+    params.push(customerId);
+  }
+
+  var where = conditions.length ? 'WHERE ' + conditions.join(' AND ') : '';
+  try {
+    var [rows] = await db.query(
+      'SELECT id, tag_number, display_name FROM assets ' + where + ' ORDER BY display_name ASC LIMIT 15',
+      params
+    );
+    var results = rows.map(function(a) {
+      return { id: a.id, label: (a.tag_number ? '[' + a.tag_number + '] ' : '') + a.display_name };
+    });
+    res.json(results);
+  } catch (err) {
+    res.json([]);
+  }
+});
 
 // Nominatim address search proxy
 // Proxying server-side lets us set a proper User-Agent as required by Nominatim's usage policy.
